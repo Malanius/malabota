@@ -23,6 +23,7 @@ export class Core extends Construct {
       'interaction-handler',
       {
         ...props,
+        discordAppSecret: secrets.discordApp,
         stackName: `${appName}-${appEnv}-${module}-interaction-handler`,
       }
     );

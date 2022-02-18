@@ -2,12 +2,16 @@ import * as cdk from 'aws-cdk-lib';
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as pylambda from '@aws-cdk/aws-lambda-python-alpha';
+import * as sm from 'aws-cdk-lib/aws-secretsmanager';
 import { Construct } from 'constructs';
 
-import { AppInfo } from '../../common/app-info';
+import { AppEnv, AppInfo } from '../../common/app-info';
 import { Models } from './api/models';
+import { secretsFields } from '../secrets/secrets-stack';
 
-export interface InteractionHandlerStackProps extends cdk.StackProps, AppInfo {}
+export interface InteractionHandlerStackProps extends cdk.StackProps, AppInfo {
+  discordAppSecret: sm.ISecret;
+}
 
 export class InteractionHandlerStack extends cdk.Stack {
   constructor(
@@ -17,7 +21,7 @@ export class InteractionHandlerStack extends cdk.Stack {
   ) {
     super(scope, id, props);
 
-    const { appName, appEnv, module } = props;
+    const { appName, appEnv, module, discordAppSecret } = props;
 
     const interactionLambda = new pylambda.PythonFunction(
       this,
@@ -35,8 +39,16 @@ export class InteractionHandlerStack extends cdk.Stack {
           ),
         ],
         logRetention: cdk.aws_logs.RetentionDays.ONE_MONTH,
+        environment: {
+          LOG_LEVEL: appEnv == AppEnv.DEV ? 'DEBUG' : 'INFO',
+          POWERTOOLS_SERVICE_NAME: 'interaction-handler',
+          DISCORD_APP_SECRET_NAME: discordAppSecret.secretName,
+          DISCORD_PUBLIC_KEY_FIELD: secretsFields.discordApp.publicKey,
+        },
       }
     );
+
+    discordAppSecret.grantRead(interactionLambda);
 
     // API
     const api = new apigateway.RestApi(this, 'apigateway', {
