@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "malabota"
+version = "0.1.0"
+description = ""
+authors = ["Malanius Privierre <malaniusprivierre@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+
+[tool.poetry.dev-dependencies]
+boto3 = "^1.21.2"
+aws-lambda-powertools = "1.25.1"
+PyNaCl = "^1.5.0"
+autopep8 = "^1.6.0"
+pytest = "^7.0.1"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
