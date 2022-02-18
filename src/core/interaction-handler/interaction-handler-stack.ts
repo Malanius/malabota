@@ -26,7 +26,7 @@ export class InteractionHandlerStack extends cdk.Stack {
         functionName: `${appName}-${appEnv}-${module}-interaction-handler`,
         entry: 'lamdbas/core/interaction-handler/',
         runtime: lambda.Runtime.PYTHON_3_9,
-        architecture: lambda.Architecture.ARM_64,
+        architecture: lambda.Architecture.X86_64,
         layers: [
           lambda.LayerVersion.fromLayerVersionArn(
             this,
