@@ -26,6 +26,7 @@ export class InteractionHandlerStack extends cdk.Stack {
         functionName: `${appName}-${appEnv}-${module}-interaction-handler`,
         entry: 'lamdbas/core/interaction-handler/',
         runtime: lambda.Runtime.PYTHON_3_9,
+        architecture: lambda.Architecture.ARM_64,
         layers: [
           lambda.LayerVersion.fromLayerVersionArn(
             this,
@@ -33,6 +34,7 @@ export class InteractionHandlerStack extends cdk.Stack {
             `arn:aws:lambda:${this.region}:017000801446:layer:AWSLambdaPowertoolsPython:11`
           ),
         ],
+        logRetention: cdk.aws_logs.RetentionDays.ONE_MONTH,
       }
     );
 
@@ -87,7 +89,7 @@ export class InteractionHandlerStack extends cdk.Stack {
         },
         {
           statusCode: '401',
-          responseModels: { 'application/json': apigateway.Model.ERROR_MODEL},
+          responseModels: { 'application/json': apigateway.Model.ERROR_MODEL },
         },
       ],
     });
