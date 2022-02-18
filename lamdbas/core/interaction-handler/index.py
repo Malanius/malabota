@@ -15,6 +15,16 @@ PUBLIC_KEY = parameters.get_secret(SECRET_NAME, "json")[PUBLIC_KEY_FIELD]
 verify_key = VerifyKey(bytes.fromhex(PUBLIC_KEY))
 logger = Logger()
 
+RESPONSE_TYPES = {
+    "PONG": 1,
+    "CHANNEL_MESSAGE_WITH_SOURCE": 4,
+    "DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE": 5,
+    "DEFERRED_UPDATE_MESSAGE": 6,
+    "UPDATE_MESSAGE": 7,
+    "APPLICATION_COMMAND_AUTOCOMPLETE_RESULT": 8,
+    "MODAL": 9
+}
+
 
 def error_response(code: int, message: str):
     return{
@@ -23,6 +33,17 @@ def error_response(code: int, message: str):
             "Access-Control-Allow-Origin": ALLOWED_ORIGIN
         },
         "body": json.dumps({"error": message}),
+        "isBase64Encoded": False
+    }
+
+
+def ok_response(type: int):
+    return {
+        "statusCode": 200,
+        "headers": {
+            "Access-Control-Allow-Origin": ALLOWED_ORIGIN
+        },
+        "body": json.dumps({"type": type}),
         "isBase64Encoded": False
     }
 
@@ -40,11 +61,14 @@ def handler(event, context):
     logger.debug("Timestamp: %s", timestamp)
 
     try:
-        verify_key.verify(f"{timestamp}{raw_body}".encode(), bytes.fromhex(signature))
+        verify_key.verify(f"{timestamp}{raw_body}".encode(),
+                          bytes.fromhex(signature))
     except BadSignatureError:
         logger.exception("Failed to verify signature!")
         return error_response(401, "invalid request signature")
 
-    # TODO: check and reply for ping
+    if request_body["type"] == 1:
+        logger.debug("Ping received, responding with PONG")
+        return ok_response(RESPONSE_TYPES["PONG"])
     # TODO: send interaction message to EventBridge
-    # TODO: respond to interaction with defer
+    return ok_response(RESPONSE_TYPES["DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE"])
