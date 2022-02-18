@@ -60,7 +60,7 @@ export class InteractionHandlerStack extends cdk.Stack {
 
     const requestValidator = api.addRequestValidator('RequestValidator', {
       validateRequestBody: true,
-      validateRequestParameters: false,
+      validateRequestParameters: true,
     });
 
     const models = new Models(this, 'Models', { api });
@@ -79,6 +79,10 @@ export class InteractionHandlerStack extends cdk.Stack {
     eventsResource.addMethod('POST', postEventIntegration, {
       operationName: 'Send event',
       requestValidator,
+      requestParameters: {
+        'method.request.header.X-Signature-Ed25519': true,
+        'method.request.header.X-Signature-Timestamp': true,
+      },
       requestModels: {
         'application/json': models.interactionRequest,
       },
